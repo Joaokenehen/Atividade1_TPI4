@@ -166,32 +166,32 @@
 
       async function enviarArquivos() {
         limparMensagem();
+
+        // --- VALIDAÇÃO FEITA ANTES DE TUDO ---
+        const arquivos = arquivoInput.files;
+
+        if (arquivos.length > 10) {
+          exibirMensagem("NÃO É POSSÍVEL ENVIAR MAIS DE 10 ARQUIVOS.", "error");
+
+          arquivoInput.value = "";
+          return;
+        }
+        // --- FIM DA VALIDAÇÃO ---
+
         enviarBtn.disabled = true;
         enviarBtn.textContent = "Enviando...";
 
         try {
-          // 1. COLETAR ARQUIVOS
-          const arquivos = arquivoInput.files;
-
           if (arquivos.length === 0) {
             exibirMensagem("Nenhum arquivo selecionado.", "alert");
             return;
           }
 
-          // ----------------------------------------------------
-          //  IMPLEMENTAÇÃO NECESSÁRIA PELO ALUNO:
-          // ----------------------------------------------------
-
-          // 2. CRIAR O OBJETO FormData
           const formData = new FormData();
-
-          // 3. FAZER O LOOP (for..of )
-          // 4. USAR formData.append('meusArquivos', arquivoAtual)
           for (const arquivo of arquivos) {
             formData.append("meusArquivos", arquivo);
           }
 
-          // 5. EXECUTAR O FETCH
           const response = await fetch("http://localhost:3000/upload", {
             method: "POST",
             body: formData,
@@ -200,15 +200,16 @@
           const data = await response.json();
 
           if (response.ok) {
-            exibirMensagem(data.message, "success");
-            console.log("Arquivos enviados:", data.file);
+            exibirMensagem(
+              data.message || "Arquivos enviados com sucesso!",
+              "success"
+            );
           } else {
-            const errorMessage =
-              data.detail || data.message || "Ocorreu um erro desconhecido.";
-            exibirMensagem(errorMessage, "error");
+            exibirMensagem(
+              data.error || "Ocorreu um erro desconhecido no servidor.",
+              "error"
+            );
           }
-
-          // --- FIM DO CÓDIGO DO ALUNO ---
         } catch (error) {
           console.error("Erro de requisição:", error);
           exibirMensagem(
